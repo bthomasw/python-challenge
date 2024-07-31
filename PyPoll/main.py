@@ -1,38 +1,76 @@
-import pandas as pd
-def print_percentage_of_votes(df, unique_value, total):
-    new_df = votes[votes['Candidate'] == unique_value]
-    new_df = new_df.reset_index(drop = True)
-    rows, columns = new_df.shape
-    percentage = rows/total
-    print(new_df.iloc[0, 2], ": ", round((percentage * 100),3), "% (", rows, ")")
+# Modules
+import os
+import csv
 
-def get_winner(df, unique_value):
-    new_df = votes[votes['Candidate'] == unique_value]
-    new_df = new_df.reset_index(drop = True)
-    rows, columns = new_df.shape
-    return rows
+# Set path for file
+csvpath = os.path.join("..","Starter_Code", "PyPoll", "Resources", "election_data.csv")
 
-votes = pd.read_csv('C:/Users/thoma/Classwork/Week 3/python-challenge/Starter_Code/PyPoll/Resources/election_data.csv')
-rows, columns = votes.shape
-print("Total Votes:", rows)
-unique_values = votes['Candidate'].unique()
-num_unique = unique_values.size
+# Open the CSV using the UTF-8 encoding
+with open(csvpath, encoding='UTF-8') as csvfile:
+    csvreader = csv.reader(csvfile, delimiter=",")
+    #skip first line (header)
+    next(csvreader)
 
+    #list that will store each unique name
+    list_of_unique_names = []
+    #seperate list that will store a count of each unique name
+    count_of_unique_names = []
+    #variable for number of rows or total votes
+    num_of_rows = 0
 
+    #for loop that goes through every line in csv file
+    for row in csvreader:
+        #counts total votes
+        num_of_rows = num_of_rows + 1
 
-for unique in range(num_unique):
-    print_percentage_of_votes(votes, unique_values[unique - 1], rows)
+        #checks if the name has been used before, if it has do nothing, if it hasn't add that name to the unique names list and add a cooresponding count varable to the count list
+        if row[2] in list_of_unique_names:
+            pass
+        else:
+            list_of_unique_names.append(row[2])
+            count_of_unique_names.append(0)
 
-highest_value = 0
-unique_index = -1
-for unique in range(num_unique):
-    new_value = get_winner(votes, unique_values[unique - 1])
-    if new_value > highest_value:
-        highest_value = new_value
-        unique_index = unique - 1
-print("Winner: ", unique_values[unique_index])
+        #check each name in list and if this row equals a name add 1 to the count in the cooresponding count list
+        for i, name in enumerate(list_of_unique_names):
+            if row[2] == list_of_unique_names[i]:
+                count_of_unique_names[i] = count_of_unique_names[i] + 1
+    
+    
+    #print results and create a text file to write to
+    f = open("Election Results.txt", "a")    
+    print("Election Results")
+    f.write("Election Results\n")
+    print("----------------------------------")
+    f.write("----------------------------------\n")
+    print("Total Votes:", num_of_rows)
+    f.write("Total Votes:")
+    f.write(str(num_of_rows))
+    f.write("\n")
+    print("----------------------------------")
+    f.write("----------------------------------\n")
+    
+    #variables to use to find who has the most votes and their name
+    highest_value = 0
+    winner_name = ""
 
+    #for loop to go through every name in list of unique names and print the cooresponding count in the count list
+    for i, name in enumerate(list_of_unique_names):
+        print(name, ": ", round((count_of_unique_names[i]/num_of_rows) * 100, 3), "% (", count_of_unique_names[i], ")")
+        f.write(str(name) + ": " + str(round((count_of_unique_names[i]/num_of_rows) * 100, 3)) + "% (" + str(count_of_unique_names[i]) + ")\n")
+        #If statement to compare the vote counts of names and replace the highest with the new highest
+        if count_of_unique_names[i] > highest_value:
+            highest_value = count_of_unique_names[i]
+            winner_name = name
 
+    #countiue printing and writing to text file 
+    print("---------------------------------")
+    f.write("---------------------------------\n")
+    print("Winner: ", winner_name)
+    f.write("Winner: " + str(winner_name) + "\n")
+    print("---------------------------------")
+    f.write("---------------------------------")
+    f.close()
 
+    
     
     
